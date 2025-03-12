@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Bildbearbeitung Deluxe</title>
+  <!-- Google Fonts: Montserrat und Open Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container-header">
+      <h1>Bildbearbeitung Deluxe</h1>
+      <nav>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+        </ul>
+      </nav>
+      <button id="modeToggle" class="mode-toggle">Dark Mode</button>
+    </div>
+  </header>
+  
+  <main>
+    <!-- Home Section -->
+    <section id="home" class="section home-section">
+      <div class="hero">
+        <h2>Willkommen bei Bildbearbeitung Deluxe</h2>
+        <p>Erleben Sie modernste Bildbearbeitung mit intuitiver Bedienung und beeindruckenden Effekten.</p>
+        <a href="#form" class="btn-primary">Jetzt starten</a>
+      </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="section features-section">
+      <div class="container">
+        <h2 class="section-header">Unsere Features</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Echtzeit-Vorschau</h3>
+          </div>
+          <div class="feature-card">
+            <h3>Flexible Transformationen</h3>
+          </div>
+          <div class="feature-card">
+            <h3>Modernes Interface</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Bildbearbeitungs-Formular Section -->
+    <section id="form" class="section form-section">
+      <div class="form-card">
+        <h2>Bearbeiten Sie Ihr Bild</h2>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="image">Bild auswählen <span>*</span></label>
+            <input type="file" name="image" id="image" required>
+          </div>
+          <div class="form-group">
+            <label for="background">Hintergrund (optional)</label>
+            <input type="file" name="background" id="background">
+          </div>
+          <div class="form-group">
+            <label for="overlay">Overlay (optional)</label>
+            <input type="file" name="overlay" id="overlay">
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="aspectRatio">Seitenverhältnis</label>
+              <input type="text" name="aspectRatio" id="aspectRatio" placeholder="auto oder 3:4">
+            </div>
+            <div class="form-group">
+              <label for="quality">Qualität</label>
+              <select name="quality" id="quality">
+                <option value="thumbnail">Thumbnail</option>
+                <option value="hd">HD</option>
+                <option value="fullhd" selected>FullHD</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="rotation">Rotation (Grad)</label>
+              <input type="number" name="rotation" id="rotation" value="0">
+            </div>
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" name="flip" id="flip" value="true"> Flip</label>
+              <label><input type="checkbox" name="flop" id="flop" value="true"> Flop</label>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="brightness">Helligkeit (0.5–1.5)</label>
+              <input type="number" step="0.1" name="brightness" id="brightness" value="1">
+            </div>
+            <div class="form-group">
+              <label for="saturation">Sättigung (0.5–1.5)</label>
+              <input type="number" step="0.1" name="saturation" id="saturation" value="1">
+            </div>
+          </div>
+          <div class="form-group checkbox-group">
+            <label><input type="checkbox" name="grayscale" id="grayscale" value="true"> Graustufen</label>
+          </div>
+          <button type="submit" id="submitButton">Bild verarbeiten</button>
+        </form>
+      </div>
+      <div id="preview" class="preview-container"></div>
+    </section>
+    
+    <!-- Kontakt Section -->
+    <section id="kontakt" class="section kontakt-section">
+      <div class="container">
+        <h2 class="section-header">Kontakt</h2>
+        <div class="contact-cards">
+          <div class="contact-card">
+            <h3>E-Mail</h3>
+            <p>sunjakdarbaraa22@gmail.com</p>
+          </div>
+          <div class="contact-card">
+            <h3>Telefon</h3>
+            <p>+49 0179 3798739</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  
+  <footer>
+    <div class="container-footer">
+      <p>&copy; 2025 Bildbearbeitung Deluxe. Alle Rechte vorbehalten.</p>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
