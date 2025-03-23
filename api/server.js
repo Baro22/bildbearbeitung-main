@@ -15,7 +15,7 @@ app.use(express.json());
 
 // Multer für Datei-Uploads (Speicherung im Arbeitsspeicher)
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, limits: { fileSize: 4.5 * 1024 * 1024 } });
 
 // Route für den Datei-Upload und die Bildverarbeitung
 app.post(
@@ -135,6 +135,9 @@ app.post(
       });
       res.end(finalImageBuffer, 'binary');
     } catch (error) {
+      if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).send('Die hochgeladene Datei überschreitet die maximale Größe von 4,5 MB.');
+      }
       console.error('Fehler in /upload:', error);
       res.status(500).send(`Ein Fehler ist aufgetreten: ${error.message}`);
     }
