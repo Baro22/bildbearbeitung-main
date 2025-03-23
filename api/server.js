@@ -6,18 +6,18 @@ const sharp = require('sharp');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Statisches Verzeichnis (eine Ebene höher, weil server.js in api liegt)
+// Statisches Verzeichnis (eine Ebene höher, da server.js in api liegt)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Body-Parser (für URL-codierte und JSON-Daten – auch wenn Multer multipart/form-data verarbeitet)
+// Body-Parser Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Multer zum Verarbeiten von Datei-Uploads (im RAM)
+// Multer für Datei-Uploads (Speicherung im Arbeitsspeicher)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Route für den Datei-Upload
+// Route für den Datei-Upload und die Bildverarbeitung
 app.post(
   '/upload',
   upload.fields([
@@ -30,31 +30,34 @@ app.post(
       console.log("req.files:", req.files);
       console.log("req.body:", req.body);
       
-      // Validierung: Prüfe, ob ein Bild hochgeladen wurde
+      // Prüfen, ob ein Hauptbild hochgeladen wurde
       if (!req.files || !req.files['image'] || req.files['image'].length === 0) {
         return res.status(400).send('Kein Bild hochgeladen.');
       }
 
       const imageBuffer = req.files['image'][0].buffer;
-      const backgroundBuffer = req.files['background']
-        ? req.files['background'][0].buffer
-        : null;
-      const overlayBuffer = req.files['overlay']
-        ? req.files['overlay'][0].buffer
-        : null;
+      const backgroundBuffer = req.files['background'] ? req.files['background'][0].buffer : null;
+      const overlayBuffer = req.files['overlay'] ? req.files['overlay'][0].buffer : null;
 
-      // Parameter aus dem Request mit Standardwerten
-      const aspectRatio = req.body.aspectRatio || 'auto'; // z. B. "3:4"
-      const quality = req.body.quality || 'fullhd'; // Optionen: thumbnail, hd, fullhd
+      // Anfrage-Parameter mit Standardwerten auslesen
+      const aspectRatio = req.body.aspectRatio || 'auto';  // z.B. "3:4"
+      const quality = req.body.quality || 'fullhd';        // thumbnail, hd oder fullhd
 
-      // Rotation sicher parsen
+      // Rotation numerisch auswerten
       let rotation = parseInt(req.body.rotation, 10);
       if (isNaN(rotation)) rotation = 0;
 
       const flip = req.body.flip === 'true';
       const flop = req.body.flop === 'true';
 
-      // Qualitätsvorgaben (Standard-Dimensionen)
+      // Helligkeit, Sättigung und Graustufen auslesen
+      let brightness = parseFloat(req.body.brightness);
+      if (isNaN(brightness) || brightness < 0) brightness = 1;
+      let saturation = parseFloat(req.body.saturation);
+      if (isNaN(saturation) || saturation < 0) saturation = 1;
+      const grayscale = req.body.grayscale === 'true';
+
+      // Ausgabe-Dimensionen basierend auf Qualität setzen
       let width, height;
       if (quality === 'thumbnail') {
         width = 300;
@@ -67,7 +70,7 @@ app.post(
         height = 1080;
       }
 
-      // Anpassung der Dimensionen anhand des Seitenverhältnisses (falls angegeben)
+      // Seitenverhältnis berücksichtigen (falls angegeben)
       if (aspectRatio !== 'auto' && width && height) {
         const [wRatio, hRatio] = aspectRatio.split(':').map(Number);
         if (!wRatio || !hRatio) {
@@ -77,10 +80,10 @@ app.post(
         }
       }
 
-      // Aufbau der Sharp-Pipeline für das Hauptbild
+      // Sharp-Pipeline für das Hauptbild aufbauen
       let processedImage = sharp(imageBuffer);
 
-      // Transformationen: Rotation, Flip, Flop
+      // Transformationen anwenden: Rotation, Flip, Flop
       if (rotation !== 0) {
         processedImage = processedImage.rotate(rotation);
       }
@@ -91,12 +94,20 @@ app.post(
         processedImage = processedImage.flop();
       }
 
-      // Größenanpassung
+      // Größenanpassung (Resize)
       if (width && height) {
         processedImage = processedImage.resize(width, height, { fit: 'cover' });
       }
 
-      // Hintergrundbild einbinden, falls vorhanden
+      // Helligkeit/Sättigung anwenden (falls vom Benutzer verändert)
+      if (!grayscale && (brightness !== 1 || saturation !== 1)) {
+        processedImage = processedImage.modulate({ brightness: brightness, saturation: saturation });
+      } else if (grayscale && brightness !== 1) {
+        // Bei Graustufen nur Helligkeit (Farbanteile werden später entfernt)
+        processedImage = processedImage.modulate({ brightness: brightness });
+      }
+
+      // Hintergrundbild einfügen, falls vorhanden
       if (backgroundBuffer) {
         let background = sharp(backgroundBuffer);
         if (width && height) {
@@ -106,14 +117,18 @@ app.post(
         processedImage = background.composite([{ input: foregroundBuffer, blend: 'over' }]);
       }
 
-      // Overlay einbinden, falls vorhanden
+      // Overlay-Bild einfügen, falls vorhanden
       if (overlayBuffer) {
         processedImage = processedImage.composite([{ input: overlayBuffer, blend: 'over' }]);
       }
 
-      // Finales Bild als PNG exportieren und senden
-      const finalImageBuffer = await processedImage.png().toBuffer();
+      // Ausgabe in Graustufen umwandeln, falls gewählt
+      if (grayscale) {
+        processedImage = processedImage.grayscale();
+      }
 
+      // Ergebnis als PNG erzeugen und zurücksenden
+      const finalImageBuffer = await processedImage.png().toBuffer();
       res.writeHead(200, {
         'Content-Type': 'image/png',
         'Content-Disposition': 'attachment; filename="ergebnis.png"',
@@ -126,7 +141,7 @@ app.post(
   }
 );
 
-// Für lokale Tests: Server starten, wenn die Datei direkt ausgeführt wird
+// Server starten (für lokale Tests)
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server läuft auf http://localhost:${PORT}`);
@@ -134,5 +149,6 @@ if (require.main === module) {
 } else {
   module.exports = app;
 }
+
 
 

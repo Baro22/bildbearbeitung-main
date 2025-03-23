@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bildbearbeitung Deluxe</title>
   <!-- Google Fonts: Montserrat und Open Sans -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -18,7 +19,7 @@
           <li><a href="#kontakt">Kontakt</a></li>
         </ul>
       </nav>
-      <button id="modeToggle" class="mode-toggle">Dark Mode</button>
+      <button id="modeToggle" class="mode-toggle">🌙 Dark Mode</button>
     </div>
   </header>
   
@@ -57,15 +58,15 @@
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
           <div class="form-group">
             <label for="image">Bild auswählen <span>*</span></label>
-            <input type="file" name="image" id="image" required>
+            <input type="file" name="image" id="image" accept="image/*" required>
           </div>
           <div class="form-group">
             <label for="background">Hintergrund (optional)</label>
-            <input type="file" name="background" id="background">
+            <input type="file" name="background" id="background" accept="image/*">
           </div>
           <div class="form-group">
             <label for="overlay">Overlay (optional)</label>
-            <input type="file" name="overlay" id="overlay">
+            <input type="file" name="overlay" id="overlay" accept="image/*">
           </div>
           <div class="form-grid">
             <div class="form-group">
@@ -126,7 +127,6 @@
         </div>
       </div>
     </section>
-    
   </main>
   
   <footer>
@@ -137,3 +137,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
